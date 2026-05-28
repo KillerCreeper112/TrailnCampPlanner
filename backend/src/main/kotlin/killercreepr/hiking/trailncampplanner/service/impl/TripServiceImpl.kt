@@ -1,5 +1,6 @@
 package killercreepr.hiking.trailncampplanner.service.impl
 
+import killercreepr.hiking.trailncampplanner.auth.extractPrincipalUser
 import killercreepr.hiking.trailncampplanner.dto.CreateTripRequest
 import killercreepr.hiking.trailncampplanner.dto.TripDto
 import killercreepr.hiking.trailncampplanner.entity.Trip
@@ -8,6 +9,7 @@ import killercreepr.hiking.trailncampplanner.mapper.mapToDto
 import killercreepr.hiking.trailncampplanner.repository.TripRepository
 import killercreepr.hiking.trailncampplanner.repository.UserRepository
 import killercreepr.hiking.trailncampplanner.service.TripService
+import org.springframework.security.access.AccessDeniedException
 import java.time.Instant
 
 class TripServiceImpl(
@@ -15,12 +17,9 @@ class TripServiceImpl(
   val tripRepository: TripRepository
 ): TripService {
   override fun createTrip(
-    userId: Long,
     dto: CreateTripRequest
   ): TripDto {
-    val user = userRepository.findById(userId).orElseThrow{
-      ResourceNotFoundException("User with ID $userId not found")
-    }
+    val user = extractPrincipalUser()
     val trip = Trip(
       createdAt = Instant.now(),
       name = dto.name,
@@ -30,10 +29,8 @@ class TripServiceImpl(
     return tripRepository.save(trip).mapToDto()
   }
 
-  override fun getUserTrips(userId: Long): List<TripDto> {
-    val user = userRepository.findById(userId).orElseThrow {
-      ResourceNotFoundException("User with ID $userId not found")
-    }
+  override fun getUserTrips(): List<TripDto> {
+    val user = extractPrincipalUser()
     return user.trips.map { trip -> trip.mapToDto() }
   }
 
@@ -45,6 +42,12 @@ class TripServiceImpl(
 
   override fun deleteTrip(id: Long) {
     getTrip(id)
+    tripRepository.deleteById(id)
+  }
+
+  override fun deleteTripIfOwner(id: Long, userId: Long) {
+    if(!tripRepository.existsByIdAndUserId(id, userId))
+      throw AccessDeniedException("Access denied")
     tripRepository.deleteById(id)
   }
 }
