@@ -6,28 +6,28 @@ import jakarta.persistence.*
 class Route(
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
-  val id: Long = 0L,
+  var id: Long = 0L,
 
   @OneToMany(fetch = FetchType.LAZY, mappedBy = "route", cascade = [CascadeType.ALL], orphanRemoval = true)
   @OrderBy("orderIndex ASC")
-  val points: MutableList<RoutePoint> = mutableListOf(),
-
+  var points: MutableList<RoutePoint> = mutableListOf()
+){
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "trip_id", nullable = false)
-  val trip: Trip
-)
+  lateinit var trip: Trip
+}
 
 @Entity
 class RoutePoint(
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
-  val id: Long = 0L,
+  var id: Long = 0L,
 
-  val latitude: Double,
-  val longitude: Double,
-  val orderIndex: Int,
-
+  var latitude: Double = 0.0,
+  var longitude: Double = 0.0,
+  var orderIndex: Int = 0
+){
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "route_id", nullable = false)
-  val route: Route
-)
+  lateinit var route: Route
+}

@@ -1,6 +1,34 @@
-const API_URL = "http://localhost:8080";
+export const API_URL = "http://localhost:8080";
+export const ENDPOINTS = {
+  USER: "/api/users",
+  AUTH: "/api/auth",
+  AUTH_LOGIN: "/api/auth/login",
+  TRIP: "/api/trips",
+}
 
-export async function apiFetch(url, options = {}){
+export const api = {
+  get: (url, options = {}) =>
+    apiFetch(url, { ...options, method: "GET" }),
+
+  post: (url, body, options= {}) =>
+    apiFetch(url, {
+      ...options,
+      method: "POST",
+      body: JSON.stringify(body),
+    }),
+
+  put: (url, body, options = {}) =>
+    apiFetch(url, {
+      ...options,
+      method: "PUT",
+      body: JSON.stringify(body),
+    }),
+
+  delete: (url, options) =>
+    apiFetch(url, { ...options, method: "DELETE" }),
+};
+
+function apiFetch(url, options = {}){
   const token = localStorage.getItem("token");
   return fetch(`${API_URL}${url}`, {
     ...options,

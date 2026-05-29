@@ -1,7 +1,7 @@
 package killercreepr.hiking.trailncampplanner.auth
 
-import killercreepr.hiking.trailncampplanner.entity.User
+import killercreepr.hiking.trailncampplanner.entity.PrincipalUser
 import org.springframework.security.core.context.SecurityContextHolder
 
-fun extractPrincipalUser(): User =
-  SecurityContextHolder.getContext().authentication?.principal as User
+fun extractPrincipalUser(): PrincipalUser =
+  SecurityContextHolder.getContext().authentication?.principal as PrincipalUser

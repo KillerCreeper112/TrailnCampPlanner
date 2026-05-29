@@ -3,6 +3,7 @@ package killercreepr.hiking.trailncampplanner.config
 import killercreepr.hiking.trailncampplanner.auth.jwt.JwtFilter
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.http.HttpMethod
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
 import org.springframework.security.config.http.SessionCreationPolicy
@@ -32,9 +33,11 @@ class SecurityConfig(
       .authorizeHttpRequests {
         it
           .requestMatchers("/api/auth/**").permitAll()
+          .requestMatchers(HttpMethod.POST, "/api/users").permitAll()
           .anyRequest().authenticated()
       }
       .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter::class.java)
+      .cors{ }
       .build()
   }
 

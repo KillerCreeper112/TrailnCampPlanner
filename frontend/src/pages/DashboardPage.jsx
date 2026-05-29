@@ -1,18 +1,20 @@
 import { useEffect, useState } from "react";
-import { apiFetch } from "../api/api";
+import {api, ENDPOINTS} from "../api/api";
+import {CreateNewTrip} from "../components/modal/CreateNewTrip.jsx";
 
 function DashboardPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [tripName, setTripName] = useState("");
-  const [tripDate, setTripDate] = useState("");
+  const [tripDescription, setTripDescription] = useState("");
+  const [tripStartDate, setTripStartDate] = useState("");
 
   const [trips, setTrips] = useState([]);
 
   useEffect(() => {
     async function loadTrips() {
       try {
-        const res = await apiFetch(`/api/trips`);
-        const data = await res.json();
+        const response = await api.get(ENDPOINTS.TRIP)
+        const data = await response.json();
         setTrips(data);
       } catch (err) {
         console.error("Failed to load trips", err);
@@ -23,26 +25,21 @@ function DashboardPage() {
   }, []);
 
   const createTrip = async () => {
-    if (!tripName || !tripDate) return;
+    if (!tripName || !tripStartDate) return;
 
     try {
-      const res = await apiFetch(`/api/trips`, {
-        method: "POST",
-        body: JSON.stringify({
-          name: tripName,
-          description: null,
-          startDate: null,
-          endDate: null,
-          difficulty: "MEDIUM",
-        }),
-      });
+      const response = await api.post(ENDPOINTS.TRIP, {
+        name: tripName,
+        description: tripDescription,
+      })
 
-      const newTrip = await res.json();
+      const newTrip = await response.json();
 
       setTrips((prev) => [newTrip, ...prev]);
 
       setTripName("");
-      setTripDate("");
+      setTripDescription("")
+      setTripStartDate("");
       setIsModalOpen(false);
     } catch (err) {
       console.error("Failed to create trip", err);
@@ -119,6 +116,19 @@ function DashboardPage() {
       </div>
 
       {isModalOpen && (
+        <CreateNewTrip
+          tripName={tripName}
+          setTripName={setTripName}
+          tripDescription={tripDescription}
+          setTripDescription={setTripDescription}
+          tripStartDate={tripStartDate}
+          setTripStartDate={setTripStartDate}
+          onCreate={createTrip}
+          onClose={() => setIsModalOpen(false)}
+        />
+      )}
+
+      {isModalOpen && (
         <div className="fixed inset-0 bg-black/60 flex items-center justify-center">
 
           <div className="bg-[#1E2C26] p-6 rounded-2xl w-full max-w-md border border-[#2A3A33]">
@@ -138,8 +148,8 @@ function DashboardPage() {
 
               <input
                 placeholder="Date (optional UI only for now)"
-                value={tripDate}
-                onChange={(e) => setTripDate(e.target.value)}
+                value={tripStartDate}
+                onChange={(e) => setTripStartDate(e.target.value)}
                 className="bg-[#18231F] border border-[#2A3A33] p-3 rounded-xl text-[#E6E6E6]"
               />
 

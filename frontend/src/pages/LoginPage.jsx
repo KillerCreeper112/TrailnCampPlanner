@@ -1,6 +1,9 @@
 import { useState } from 'react';
+import {api, ENDPOINTS} from "../api/api.js";
+import {useNavigate} from "react-router-dom";
 
 function LoginPage() {
+  const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [emailError, setEmailError] = useState('');
@@ -11,16 +14,9 @@ function LoginPage() {
 
   const handleLogin = async () => {
     try {
-      const response = await fetch('http://localhost:8080/api/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          email,
-          password,
-        }),
-      });
+      const response = await api.post(ENDPOINTS.AUTH_LOGIN, {
+        email, password
+      })
 
       if (!response.ok) {
         throw new Error(response.statusText);
@@ -29,6 +25,7 @@ function LoginPage() {
       const data = await response.json();
       localStorage.setItem('token', data.token);
       console.log("Logged in user:", data);
+      navigate("/dashboard");
     } catch (err) {
       console.error(err);
     }

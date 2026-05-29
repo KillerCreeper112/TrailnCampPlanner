@@ -10,8 +10,10 @@ import killercreepr.hiking.trailncampplanner.repository.TripRepository
 import killercreepr.hiking.trailncampplanner.repository.UserRepository
 import killercreepr.hiking.trailncampplanner.service.TripService
 import org.springframework.security.access.AccessDeniedException
+import org.springframework.stereotype.Service
 import java.time.Instant
 
+@Service
 class TripServiceImpl(
   val userRepository: UserRepository,
   val tripRepository: TripRepository
@@ -19,19 +21,22 @@ class TripServiceImpl(
   override fun createTrip(
     dto: CreateTripRequest
   ): TripDto {
-    val user = extractPrincipalUser()
+    val principal = extractPrincipalUser()
+    val user = userRepository.findById(principal.id).orElseThrow {
+      ResourceNotFoundException("User with id ${principal.id} not found")
+    }
     val trip = Trip(
-      createdAt = Instant.now(),
       name = dto.name,
-      description = dto.description,
-      user = user
-    )
+      description = dto.description
+    ).also { it.createdAt = Instant.now(); it.user = user }
     return tripRepository.save(trip).mapToDto()
   }
 
   override fun getUserTrips(): List<TripDto> {
     val user = extractPrincipalUser()
-    return user.trips.map { trip -> trip.mapToDto() }
+    return userRepository.findById(user.id).orElseThrow {
+      ResourceNotFoundException("User with id ${user.id} not found")
+    }.trips.map { trip -> trip.mapToDto() }
   }
 
   override fun getTrip(id: Long): TripDto = tripRepository.findById(id)

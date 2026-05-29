@@ -9,26 +9,26 @@ import java.time.LocalDate
 @Entity
 @EntityListeners(AuditingEntityListener::class)
 class Trip(
-  @CreatedDate
-  val createdAt: Instant,
-
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
-  val id: Long = 0L,
-  val name: String,
-  val description: String? = null,
-  val startDate: LocalDate? = null,
-  val endDate: LocalDate? = null,
+  var id: Long = 0L,
+  var name: String = "",
+  var description: String? = null,
+  var startDate: LocalDate? = null,
+  var endDate: LocalDate? = null,
   @Enumerated(EnumType.STRING)
-  val difficulty: TripDifficulty = TripDifficulty.MEDIUM,
+  var difficulty: TripDifficulty = TripDifficulty.MEDIUM,
+
+  @OneToMany(fetch = FetchType.LAZY, mappedBy = "trip", cascade = [CascadeType.ALL], orphanRemoval = true)
+  var routes: MutableList<Route> = mutableListOf(),
+){
+  @CreatedDate
+  lateinit var createdAt: Instant
 
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "user_id", nullable = false)
-  val user: User,
-
-  @OneToMany(fetch = FetchType.LAZY, mappedBy = "route", cascade = [CascadeType.ALL], orphanRemoval = true)
-  val routes: MutableList<Route> = mutableListOf(),
-)
+  lateinit var user: User
+}
 
 enum class TripDifficulty{
   EASY, MEDIUM, HARD

@@ -10,7 +10,9 @@ import killercreepr.hiking.trailncampplanner.repository.UserRepository
 import killercreepr.hiking.trailncampplanner.service.UserService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.crypto.password.PasswordEncoder
+import org.springframework.stereotype.Service
 
+@Service
 class UserServiceImpl(
   val userRepository: UserRepository
 ): UserService {
@@ -21,7 +23,7 @@ class UserServiceImpl(
     if(userRepository.existsByName(dto.name)){
       throw ResourceAlreadyExistsException("User already exists with name ${dto.name}")
     }
-    if(dto.email?.let{userRepository.existsByEmail(it)} == true){
+    if(userRepository.existsByEmail(dto.email)){
       throw ResourceAlreadyExistsException("User already exists with email ${dto.email}")
     }
 

@@ -3,6 +3,7 @@ package killercreepr.hiking.trailncampplanner.auth.jwt
 import jakarta.servlet.FilterChain
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
+import killercreepr.hiking.trailncampplanner.entity.PrincipalUser
 import killercreepr.hiking.trailncampplanner.repository.UserRepository
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.context.SecurityContextHolder
@@ -28,7 +29,7 @@ class JwtFilter(
 
     val token = authHeader.substring(authHeaderPrefix.length)
     if (!jwtService.isValid(token)) {
-      filterChain.doFilter(request, response)
+      response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid token")
       return
     }
 
@@ -36,7 +37,7 @@ class JwtFilter(
     val user = userRepository.findById(userId.toLong()).orElse(null)
     if (user != null) {
       val auth = UsernamePasswordAuthenticationToken(
-        user,
+        PrincipalUser(user.id, user.name),
         null,
         emptyList()
       )

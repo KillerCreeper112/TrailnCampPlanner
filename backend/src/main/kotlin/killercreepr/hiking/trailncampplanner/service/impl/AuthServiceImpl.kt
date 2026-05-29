@@ -7,7 +7,9 @@ import killercreepr.hiking.trailncampplanner.exception.ResourceNotFoundException
 import killercreepr.hiking.trailncampplanner.repository.UserRepository
 import killercreepr.hiking.trailncampplanner.service.AuthService
 import org.springframework.security.crypto.password.PasswordEncoder
+import org.springframework.stereotype.Service
 
+@Service
 class AuthServiceImpl(
   val userRepository: UserRepository,
   val passwordEncoder: PasswordEncoder,

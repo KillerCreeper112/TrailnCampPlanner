@@ -12,11 +12,11 @@ import killercreepr.hiking.trailncampplanner.entity.User
 fun User.mapToDto(): UserDto = UserDto(id, name, email)
 fun UserDto.mapToEntity(password: String): User = User(id, name, password, email)
 
-fun RoutePointDto.mapToEntity(route: Route): RoutePoint = RoutePoint(id, latitude, longitude, orderIndex, route)
+fun RoutePointDto.mapToEntity(route: Route): RoutePoint = RoutePoint(id, latitude, longitude, orderIndex).also{it.route = route}
 fun RoutePoint.mapToDto(): RoutePointDto = RoutePointDto(id, latitude, longitude, orderIndex)
 
 fun Route.mapToDto(): RouteDto = RouteDto(id, points.map { it.mapToDto() })
-fun RouteDto.mapToEntity(trip: Trip): Route = Route(id, trip = trip)
+fun RouteDto.mapToEntity(trip: Trip): Route = Route(id).also { it.trip = trip }
 
 fun Trip.mapToDto(): TripDto = TripDto(
   createdAt, id, name, description, startDate, endDate, difficulty, routes.map { it.mapToDto() }

@@ -3,12 +3,12 @@ package killercreepr.hiking.trailncampplanner.auth.jwt.impl
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.security.Keys
 import killercreepr.hiking.trailncampplanner.auth.jwt.JwtService
-import killercreepr.hiking.trailncampplanner.config.JwtConfig
+import killercreepr.hiking.trailncampplanner.config.JwtProperties
 import killercreepr.hiking.trailncampplanner.entity.User
 import java.util.*
 
 class JwtServiceImpl(
-  val config: JwtConfig,
+  val config: JwtProperties,
 ) : JwtService {
   private val secretKey by lazy { Keys.hmacShaKeyFor(config.secret.toByteArray()) }
   private val expirationMilliseconds by lazy { config.expirationMilliseconds }

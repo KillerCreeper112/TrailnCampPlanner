@@ -1,6 +1,10 @@
 import { useState } from 'react';
+import {api, ENDPOINTS} from "../api/api.js";
+import {webpack} from "globals";
+import {useNavigate} from "react-router-dom";
 
 function SignUpPage() {
+  const navigate = useNavigate();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -12,25 +16,19 @@ function SignUpPage() {
 
   const handleSignUp = async () => {
     try {
-      const response = await fetch('http://localhost:3001/signup', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          name,
-          email,
-          password,
-        })
-      });
+      const response = await api.post(ENDPOINTS.USER, {
+        name, email, password
+      })
 
       if (!response.ok) {
         throw new Error(response.statusText);
       }
 
       const data = await response.json();
+
       //todo set token
       console.log("Created user: ", data);
+      navigate("/login")
 
     } catch (err) {
       console.error(err);

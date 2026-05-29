@@ -8,7 +8,9 @@ import killercreepr.hiking.trailncampplanner.mapper.mapToDto
 import killercreepr.hiking.trailncampplanner.repository.RouteRepository
 import killercreepr.hiking.trailncampplanner.repository.TripRepository
 import killercreepr.hiking.trailncampplanner.service.RouteService
+import org.springframework.stereotype.Service
 
+@Service
 class RouteServiceImpl(
   val routeRepository: RouteRepository,
   val tripRepository: TripRepository,
@@ -19,7 +21,7 @@ class RouteServiceImpl(
   ): RouteDto {
     val trip = tripRepository.findById(tripId)
       .orElseThrow { ResourceNotFoundException("Trip with ID $tripId not found") }
-    val route = Route(trip = trip)
+    val route = Route().also { it.trip = trip }
     return routeRepository.save(route).mapToDto()
   }
 

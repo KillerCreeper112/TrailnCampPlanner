@@ -8,7 +8,9 @@ import killercreepr.hiking.trailncampplanner.mapper.mapToDto
 import killercreepr.hiking.trailncampplanner.repository.RoutePointRepository
 import killercreepr.hiking.trailncampplanner.repository.RouteRepository
 import killercreepr.hiking.trailncampplanner.service.RoutePointService
+import org.springframework.stereotype.Service
 
+@Service
 class RoutePointServiceImpl(
   val routePointRepository: RoutePointRepository,
   val routeRepository: RouteRepository
@@ -23,9 +25,8 @@ class RoutePointServiceImpl(
     val point = RoutePoint(
       latitude = dto.latitude,
       longitude = dto.longitude,
-      orderIndex = dto.orderIndex,
-      route = route
-    )
+      orderIndex = dto.orderIndex
+    ).also{it.route = route}
     return routePointRepository.save(point).mapToDto()
   }
 }

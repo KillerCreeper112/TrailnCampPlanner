@@ -7,12 +7,17 @@ import jakarta.persistence.*
 class User(
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
-  val id: Long = 0L,
+  var id: Long = 0L,
   @Column(nullable = false, unique = true)
-  val name: String,
-  val password: String,
-  val email: String?,
+  var name: String = "",
+  var password: String = "",
+  var email: String = "",
 
   @OneToMany(mappedBy = "user", cascade = [CascadeType.ALL], orphanRemoval = true)
-  val trips: MutableList<Trip> = mutableListOf()
+  var trips: MutableList<Trip> = mutableListOf()
+)
+
+data class PrincipalUser(
+  val id: Long,
+  val name: String
 )
