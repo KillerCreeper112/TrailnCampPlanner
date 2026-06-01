@@ -19,6 +19,11 @@ interface TripRepository : JpaRepository<Trip, Long>{
   fun existsByName(name: String): Boolean
 
   fun existsByIdAndUserId(id: Long, userId: Long): Boolean
+  fun findByIdAndUserId(id: Long, userId: Long): Trip?
 }
-interface RouteRepository : JpaRepository<Route, Long>
-interface RoutePointRepository : JpaRepository<RoutePoint, Long>
+interface RouteRepository : JpaRepository<Route, Long>{
+  fun findByIdAndTripUserId(id: Long, userId: Long): Route?
+}
+interface RoutePointRepository : JpaRepository<RoutePoint, Long>{
+  fun findByIdAndRouteTripUserId(id: Long, userId: Long): RoutePoint?
+}

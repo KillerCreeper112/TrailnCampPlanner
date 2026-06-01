@@ -12,3 +12,8 @@ data class CreateRoutePointRequest(
   val longitude: Double,
   val orderIndex: Int
 )
+
+data class UpdateRoutePointRequest(
+  val latitude: Double,
+  val longitude: Double
+)

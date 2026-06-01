@@ -4,6 +4,8 @@ export const ENDPOINTS = {
   AUTH: "/api/auth",
   AUTH_LOGIN: "/api/auth/login",
   TRIP: "/api/trips",
+  ROUTE: "/api/routes",
+  ROUTE_POINT: "/api/route_points"
 }
 
 export const api = {
