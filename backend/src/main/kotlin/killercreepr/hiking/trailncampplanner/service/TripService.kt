@@ -10,4 +10,5 @@ interface TripService {
   fun getAllTrips(): List<TripDto>
   fun deleteTrip(id: Long)
   fun deleteTripIfOwner(id: Long, userId: Long)
+  fun getTripIfOwner(id: Long, userId: Long): TripDto
 }

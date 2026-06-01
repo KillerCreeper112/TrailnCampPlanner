@@ -15,6 +15,14 @@ data class TripDto(
   val routes: List<RouteDto>
 )
 
+data class UpdateTripRequest(
+  val name: String,
+  val description: String?,
+  val startDate: LocalDate?,
+  val endDate: LocalDate?,
+  val difficulty: TripDifficulty,
+)
+
 data class CreateTripRequest(
   val name: String,
   val description: String?

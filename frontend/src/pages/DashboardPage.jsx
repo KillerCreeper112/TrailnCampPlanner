@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {api, ENDPOINTS} from "../api/api";
 import {CreateNewTrip} from "../components/modal/CreateNewTrip.jsx";
 
 function DashboardPage() {
+  const navigate = useNavigate();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [tripName, setTripName] = useState("");
   const [tripDescription, setTripDescription] = useState("");
@@ -95,9 +97,18 @@ function DashboardPage() {
         <div className="grid gap-4">
 
           {trips.map((trip) => (
-            <div
+            <button
               key={trip.id}
-              className="bg-[#1E2C26] border border-[#2A3A33] p-5 rounded-2xl flex justify-between items-center"
+              onClick={() => navigate(`/trips/${trip.id}/edit`)}
+              className="
+      w-full text-left
+      bg-[#1E2C26]
+      border border-[#2A3A33]
+      p-5 rounded-2xl
+      flex justify-between items-center
+      transition-all duration-200
+      hover:-translate-y-1 hover:shadow-lg hover:border-[#C2A878]
+    "
             >
               <div>
                 <p className="font-semibold">{trip.name}</p>
@@ -105,11 +116,7 @@ function DashboardPage() {
                   {trip.startDate ?? "No date set"}
                 </p>
               </div>
-
-              <button className="text-[#C2A878] hover:text-white text-sm">
-                View
-              </button>
-            </div>
+            </button>
           ))}
 
         </div>

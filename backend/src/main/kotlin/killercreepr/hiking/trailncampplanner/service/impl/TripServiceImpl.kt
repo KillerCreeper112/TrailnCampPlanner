@@ -51,8 +51,21 @@ class TripServiceImpl(
   }
 
   override fun deleteTripIfOwner(id: Long, userId: Long) {
+    checkOwner(id, userId)
+    tripRepository.deleteById(id)
+  }
+
+  private fun checkOwner(id: Long, userId: Long) {
     if(!tripRepository.existsByIdAndUserId(id, userId))
       throw AccessDeniedException("Access denied")
-    tripRepository.deleteById(id)
+  }
+
+  override fun getTripIfOwner(
+    id: Long,
+    userId: Long
+  ): TripDto {
+    checkOwner(id, userId)
+    return tripRepository.findById(id)
+      .orElseThrow { ResourceNotFoundException("Trip with ID $id not found") }.mapToDto()
   }
 }

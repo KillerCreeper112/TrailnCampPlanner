@@ -3,6 +3,7 @@ package killercreepr.hiking.trailncampplanner.controller
 import killercreepr.hiking.trailncampplanner.auth.extractPrincipalUser
 import killercreepr.hiking.trailncampplanner.dto.CreateTripRequest
 import killercreepr.hiking.trailncampplanner.dto.TripDto
+import killercreepr.hiking.trailncampplanner.dto.UpdateTripRequest
 import killercreepr.hiking.trailncampplanner.service.TripService
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -18,6 +19,17 @@ class TripController(
     ResponseEntity<TripDto>{
     val created = tripService.createTrip(dto)
     return ResponseEntity(created, HttpStatus.CREATED)
+  }
+
+  @PutMapping("/{id}")
+  fun updateTrip(@PathVariable id:Long, @RequestBody dto: UpdateTripRequest): ResponseEntity<TripDto>{
+
+  }
+
+  @GetMapping("{id}")
+  fun getTrip(@PathVariable id: Long): ResponseEntity<TripDto>{
+    val user = extractPrincipalUser()
+    return ResponseEntity.ok(tripService.getTripIfOwner(id, user.id))
   }
 
   @GetMapping
