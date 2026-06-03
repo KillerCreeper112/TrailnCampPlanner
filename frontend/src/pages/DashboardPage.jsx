@@ -12,6 +12,12 @@ function DashboardPage() {
 
   const [trips, setTrips] = useState([]);
 
+  const maxDescriptionLength = 64
+  const truncateDescription = (trip) =>{
+    if(!trip.description || trip.description.length <= maxDescriptionLength) return trip.description;
+    return trip.description.substring(0, maxDescriptionLength) + " ...";
+  }
+
   useEffect(() => {
     async function loadTrips() {
       try {
@@ -47,6 +53,9 @@ function DashboardPage() {
       console.error("Failed to create trip", err);
     }
   };
+
+  const formatDate = (date) =>
+    new Date(date).toLocaleDateString();
 
   return (
     <div className="min-h-screen bg-[#121A17] text-[#E6E6E6] flex">
@@ -113,9 +122,15 @@ function DashboardPage() {
               <div>
                 <p className="font-semibold">{trip.name}</p>
                 <p className="text-sm text-[#A7B0AA]">
-                  {trip.startDate ?? "No date set"}
+                  {trip.startDate ?
+                    trip.endDate ?
+                      `${formatDate(trip.startDate)} - ${formatDate(trip.endDate)}`
+                      : formatDate(trip.startDate)
+                    : "No date set"
+                  }
                 </p>
               </div>
+              <p className="text-sm text-[#A7B0AA]">{truncateDescription(trip)}</p>
             </button>
           ))}
 

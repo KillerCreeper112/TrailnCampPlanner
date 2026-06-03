@@ -39,9 +39,9 @@ function EditTripPage() {
         const data = await res.json();
 
         setTripName(data.name || "");
-        setTripDates(data.dates || {
-          from: undefined,
-          to: undefined,
+        setTripDates({
+          from: data.startDate ? new Date(data.startDate) : null,
+          to: data.endDate ? new Date(data.endDate) : null,
         });
         setDescription(data.description || "");
         setDifficulty(data.difficulty || "MEDIUM");
@@ -134,15 +134,22 @@ function EditTripPage() {
     );
   };
 
+  const handleDeleteRoute = async (routeId) =>{
+    const response = await api.delete(`${ENDPOINTS.ROUTE}/${routeId}`, {});
+    setRoutes(prev =>{
+      return prev.filter(p => p.id !== routeId);
+    });
+  }
+
   const handleDeletePoint = async (routeId, pointId) => {
     const route = routes.find(r => r.id === routeId);
     if(!route) return;
 
-    const response = await api.delete(`${ENDPOINTS.ROUTE_POINT}/${route.id}`, {});
+    const response = await api.delete(`${ENDPOINTS.ROUTE_POINT}/${pointId}`, {});
     //const result = await response.json()
 
     setRoutes(prev =>
-      prev.map(async route => {
+      prev.map(route => {
         if (route.id !== routeId) return route;
         return {
           ...route,
@@ -245,7 +252,18 @@ function EditTripPage() {
                   : "bg-[#18231F]"
               }`}
             >
-              Route #{r.id}
+              <div className="flex justify-between items-center">
+                <span>Route #{r.id}</span>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleDeleteRoute(r.id);
+                  }}
+                  className="p-1 bg-red-500 rounded cursor-pointer"
+                >
+                  🗑️
+                </button>
+              </div>
             </div>
           ))}
         </div>
