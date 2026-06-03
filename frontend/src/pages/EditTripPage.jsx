@@ -85,18 +85,19 @@ function EditTripPage() {
     const lat = event.latLng.lat();
     const lng = event.latLng.lng();
 
+    const route = routes.find(r => r.id === activeRouteId);
+    if(!route) return;
+
+    const response = await api.post(`${ENDPOINTS.ROUTE}/${route.id}`, {
+      latitude: lat,
+      longitude: lng,
+      orderIndex: route.points.length
+    })
+    const newPoint = await response.json();
+
     setRoutes(prev =>
-      prev.map(async route => {
+      prev.map(route => {
         if (route.id !== activeRouteId) return route;
-
-        const response = await api.post(`${ENDPOINTS.ROUTE}/${route.id}`, {
-          latitude: lat,
-          longitude: lng,
-          orderIndex: route.points.length
-        });
-
-        const newPoint = await response.json();
-
         return {
           ...route,
           points: [...route.points, newPoint],
@@ -105,21 +106,22 @@ function EditTripPage() {
     );
   };
 
-  const handleMarkerDragEnd = (routeId, pointId, event) => {
+  const handleMarkerDragEnd = async (routeId, pointId, event) => {
     const lat = event.latLng.lat();
     const lng = event.latLng.lng();
 
+    const route = routes.find(r => r.id === routeId);
+    if(!route) return;
+    const response = await api.put(`${ENDPOINTS.ROUTE_POINT}/${pointId}`, {
+      latitude: lat,
+      longitude: lng
+    })
+
+    const newPoint = await response.json();
+
     setRoutes(prev =>
-      prev.map(async route => {
+      prev.map(route => {
         if (route.id !== routeId) return route;
-
-        const response = await api.put(`${ENDPOINTS.ROUTE_POINT}/${route.id}`, {
-          latitude: lat,
-          longitude: lng
-        })
-
-        const newPoint = await response.json();
-
         return {
           ...route,
           points: route.points.map(p =>
@@ -132,14 +134,16 @@ function EditTripPage() {
     );
   };
 
-  const handleDeletePoint = (routeId, pointId) => {
+  const handleDeletePoint = async (routeId, pointId) => {
+    const route = routes.find(r => r.id === routeId);
+    if(!route) return;
+
+    const response = await api.delete(`${ENDPOINTS.ROUTE_POINT}/${route.id}`, {});
+    //const result = await response.json()
+
     setRoutes(prev =>
       prev.map(async route => {
         if (route.id !== routeId) return route;
-
-        const response = await api.delete(`${ENDPOINTS.ROUTE}/${route.id}`);
-        const result = await response.json()
-
         return {
           ...route,
           points: route.points.filter(p => p.id !== pointId),
@@ -249,6 +253,7 @@ function EditTripPage() {
         <div className="flex-1">
           <TripMap
             routes={routes}
+            selectedRouteId={activeRouteId}
             onClick={editorMode ? handleMapClick : undefined}
             onDragStart={(e) =>{
               setContextMenu(null)

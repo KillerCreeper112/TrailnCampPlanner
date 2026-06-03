@@ -1,5 +1,6 @@
 package killercreepr.hiking.trailncampplanner.config
 
+import jakarta.servlet.http.HttpServletResponse
 import killercreepr.hiking.trailncampplanner.auth.jwt.JwtFilter
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -9,6 +10,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.http.SessionCreationPolicy
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.security.crypto.password.PasswordEncoder
+import org.springframework.security.web.AuthenticationEntryPoint
 import org.springframework.security.web.SecurityFilterChain
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter
 import org.springframework.web.cors.CorsConfiguration
@@ -22,6 +24,13 @@ class SecurityConfig(
 ) {
   @Bean
   fun passwordEncoder(): PasswordEncoder = BCryptPasswordEncoder()
+
+  @Bean
+  fun authenticationEntryPoint(): AuthenticationEntryPoint {
+    return AuthenticationEntryPoint { request, response, exception ->
+      response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized")
+    }
+  }
 
   @Bean
   fun securityFilterChain(http: HttpSecurity): SecurityFilterChain {
@@ -38,6 +47,9 @@ class SecurityConfig(
       }
       .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter::class.java)
       .cors{ }
+      .exceptionHandling {
+        it.authenticationEntryPoint(authenticationEntryPoint())
+      }
       .build()
   }
 

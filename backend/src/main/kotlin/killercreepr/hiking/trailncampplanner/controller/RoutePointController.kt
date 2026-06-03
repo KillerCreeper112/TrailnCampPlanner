@@ -19,4 +19,11 @@ class RoutePointController(
                        @RequestBody dto: UpdateRoutePointRequest): ResponseEntity<RoutePointDto> {
     return ResponseEntity.ok(routePointService.updateRoutePoint(routeId, user.id, dto))
   }
+
+  @DeleteMapping("/{id}")
+  fun deleteRoute(@AuthenticationPrincipal user: PrincipalUser,
+                  @PathVariable id: Long): ResponseEntity<String> {
+    routePointService.deleteRoutePoint(id, user.id)
+    return ResponseEntity.ok("Deleted route point $id")
+  }
 }

@@ -6,6 +6,7 @@ import jakarta.servlet.http.HttpServletResponse
 import killercreepr.hiking.trailncampplanner.entity.PrincipalUser
 import killercreepr.hiking.trailncampplanner.repository.UserRepository
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
+import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Component
 import org.springframework.web.filter.OncePerRequestFilter
@@ -21,6 +22,10 @@ class JwtFilter(
     response: HttpServletResponse,
     filterChain: FilterChain
   ) {
+    if (request.requestURI.startsWith("/api/auth/")) {
+      filterChain.doFilter(request, response)
+      return
+    }
 
     val authHeader = request.getHeader("Authorization")
 
@@ -41,7 +46,9 @@ class JwtFilter(
       val auth = UsernamePasswordAuthenticationToken(
         PrincipalUser(user.id, user.name),
         null,
-        emptyList()
+        listOf(
+          SimpleGrantedAuthority("USER")
+        )
       )
       SecurityContextHolder.getContext().authentication = auth
     }

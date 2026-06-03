@@ -88,8 +88,8 @@ class TripServiceImpl(
       this.trip = trip
     }
     trip.routes.add(route)
-    tripRepository.save(trip)
-    return route.mapToDto()
+    val saved = tripRepository.save(trip)
+    return saved.routes.last().mapToDto() //route.mapToDto()
   }
 
   override fun removeRouteFromTrip(id: Long, userId: Long, routeId: Long) {

@@ -39,6 +39,13 @@ function apiFetch(url, options = {}){
       ...(token && { Authorization: `Bearer ${token}` }),
       ...options.headers,
     }
+  }).then(async response => {
+    if(response.status === 401){
+      localStorage.removeItem("token");
+      window.location.href = "/login";
+      return Promise.reject(new Error("Unauthorized"));
+    }
+    return response;
   })
 }
 

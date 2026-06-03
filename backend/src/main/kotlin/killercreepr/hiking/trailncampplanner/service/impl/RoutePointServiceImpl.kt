@@ -31,6 +31,11 @@ class RoutePointServiceImpl(
     return routePointRepository.save(point).mapToDto()
   }
 
+  override fun deleteRoutePoint(id: Long, userId: Long) {
+    if(!routePointRepository.existsById(id)) throw ResourceNotFoundException("Route point with ID $id not found")
+    routePointRepository.deleteById(id)
+  }
+
   override fun updateRoutePoint(
     id: Long,
     userId: Long,

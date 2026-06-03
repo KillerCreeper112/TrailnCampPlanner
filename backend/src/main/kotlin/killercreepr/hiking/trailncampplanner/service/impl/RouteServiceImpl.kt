@@ -31,7 +31,7 @@ class RouteServiceImpl(
     }
     route.points.add(point)
     routeRepository.save(route)
-    return point.mapToDto()
+    return route.points.last().mapToDto() //point.mapToDto()
   }
 
   override fun createRoute(
