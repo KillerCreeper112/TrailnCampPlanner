@@ -1,10 +1,19 @@
 package killercreepr.hiking.trailncampplanner.repository
 
+import killercreepr.hiking.trailncampplanner.entity.Note
 import killercreepr.hiking.trailncampplanner.entity.Route
 import killercreepr.hiking.trailncampplanner.entity.RoutePoint
 import killercreepr.hiking.trailncampplanner.entity.Trip
 import killercreepr.hiking.trailncampplanner.entity.User
 import org.springframework.data.jpa.repository.JpaRepository
+
+interface NoteRepository: JpaRepository<Note, Long>{
+  fun findByIdAndCreatedById(id: Long, createdById: Long): Note?
+  fun findAllByTripId(tripId: Long): List<Note>
+  fun findAllByRouteId(routeId: Long): List<Note>
+  fun findAllByRoutePointId(routePointId: Long): List<Note>
+  fun findAllByTripIdAndLatitudeIsNotNullAndLongitudeIsNotNull(tripId: Long): List<Note>
+}
 
 interface UserRepository: JpaRepository<User, Long>{
   fun findByName(name: String): User?

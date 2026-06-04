@@ -8,6 +8,8 @@ class Route(
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   var id: Long = 0L,
 
+  var name: String,
+
   @OneToMany(fetch = FetchType.LAZY, mappedBy = "route", cascade = [CascadeType.ALL], orphanRemoval = true)
   @OrderBy("orderIndex ASC")
   var points: MutableList<RoutePoint> = mutableListOf()
