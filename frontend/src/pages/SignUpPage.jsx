@@ -2,8 +2,10 @@ import { useState } from 'react';
 import {api, ENDPOINTS} from "../api/api.js";
 import {webpack} from "globals";
 import {useNavigate} from "react-router-dom";
+import {useAuth} from "@/components/auth/AuthContext.jsx";
 
 function SignUpPage() {
+  const {isAuth, login, logout} = useAuth();
   const navigate = useNavigate();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -25,10 +27,10 @@ function SignUpPage() {
       }
 
       const data = await response.json();
+      login(data.token);
 
-      //todo set token
       console.log("Created user: ", data);
-      navigate("/login")
+      navigate("/dashboard");
 
     } catch (err) {
       console.error(err);

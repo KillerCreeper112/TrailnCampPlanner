@@ -1,8 +1,10 @@
 import { useState } from 'react';
 import {api, ENDPOINTS} from "../api/api.js";
 import {useNavigate} from "react-router-dom";
+import {useAuth} from "@/components/auth/AuthContext.jsx";
 
 function LoginPage() {
+  const { login } = useAuth();
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -23,7 +25,8 @@ function LoginPage() {
       }
 
       const data = await response.json();
-      localStorage.setItem('token', data.token);
+      login(data.token);
+      //localStorage.setItem('token', data.token);
       console.log("Logged in user:", data);
       navigate("/dashboard");
     } catch (err) {

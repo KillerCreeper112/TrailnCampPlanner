@@ -1,10 +1,12 @@
 import { Link } from "react-router-dom";
+import {useAuth} from "@/components/auth/AuthContext.jsx";
 
 function HomePage() {
+  const { isAuth } = useAuth();
   return (
     <div className="min-h-screen bg-[#121A17] text-[#E6E6E6]">
 
-      <section className="text-center px-6 py-20">
+      <section className="text-center px-6 py-20 flex flex-col items-center">
         <h2 className="text-5xl font-bold text-[#C2A878] mb-4">
           Plan Your Next Adventure
         </h2>
@@ -14,19 +16,29 @@ function HomePage() {
         </p>
 
         <div className="flex justify-center gap-4">
-          <Link
-            to="/sign_up"
-            className="bg-[#2F5D50] hover:bg-[#1E3D35] px-6 py-3 rounded-xl font-semibold transition"
-          >
-            Get Started
-          </Link>
+          { isAuth ? (
+            <Link
+              to="/dashboard"
+              className="bg-[#2F5D50] hover:bg-[#1E3D35] px-6 py-3 rounded-xl font-semibold transition"
+            >
+              Get Started
+            </Link>
+          ) : (<>
+            <Link
+              to="/sign_up"
+              className="bg-[#2F5D50] hover:bg-[#1E3D35] px-6 py-3 rounded-xl font-semibold transition"
+            >
+              Get Started
+            </Link>
 
-          <Link
-            to="/login"
-            className="border border-[#2A3A33] px-6 py-3 rounded-xl hover:border-[#C2A878] transition"
-          >
-            Login
-          </Link>
+            <Link
+              to="/login"
+              className="border border-[#2A3A33] px-6 py-3 rounded-xl hover:border-[#C2A878] transition"
+            >
+              Login
+            </Link>
+            </>)
+          }
         </div>
       </section>
 
