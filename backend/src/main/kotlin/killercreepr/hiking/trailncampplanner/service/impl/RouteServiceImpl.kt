@@ -41,7 +41,9 @@ class RouteServiceImpl(
   ): RouteDto {
     val trip = tripRepository.findByIdAndUserId(tripId, userId) ?:
     throw ResourceNotFoundException("Trip with ID $tripId not found")
-    val route = Route().also { it.trip = trip }
+    val route = Route(
+      name = dto.name
+    ).also { it.trip = trip }
     return routeRepository.save(route).mapToDto()
   }
 

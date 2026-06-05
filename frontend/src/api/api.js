@@ -5,7 +5,8 @@ export const ENDPOINTS = {
   AUTH_LOGIN: "/api/auth/login",
   TRIP: "/api/trips",
   ROUTE: "/api/routes",
-  ROUTE_POINT: "/api/route_points"
+  ROUTE_POINT: "/api/route_points",
+  NOTE: "/api/notes",
 }
 
 export const api = {

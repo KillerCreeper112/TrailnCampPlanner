@@ -1,12 +1,15 @@
 package killercreepr.hiking.trailncampplanner.controller
 
 import killercreepr.hiking.trailncampplanner.auth.extractPrincipalUser
+import killercreepr.hiking.trailncampplanner.dto.CreateNoteRequest
 import killercreepr.hiking.trailncampplanner.dto.CreateRouteRequest
 import killercreepr.hiking.trailncampplanner.dto.CreateTripRequest
+import killercreepr.hiking.trailncampplanner.dto.NoteDto
 import killercreepr.hiking.trailncampplanner.dto.RouteDto
 import killercreepr.hiking.trailncampplanner.dto.TripDto
 import killercreepr.hiking.trailncampplanner.dto.UpdateTripRequest
 import killercreepr.hiking.trailncampplanner.entity.PrincipalUser
+import killercreepr.hiking.trailncampplanner.service.NoteService
 import killercreepr.hiking.trailncampplanner.service.TripService
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -16,8 +19,10 @@ import org.springframework.web.bind.annotation.*
 @RestController
 @RequestMapping("/api/trips")
 class TripController(
-  val tripService: TripService
+  val tripService: TripService,
+  val noteService: NoteService
 ) {
+
   @PostMapping
   fun createTrip(@AuthenticationPrincipal user: PrincipalUser, @RequestBody dto: CreateTripRequest):
     ResponseEntity<TripDto>{

@@ -1,6 +1,7 @@
 package killercreepr.hiking.trailncampplanner.repository
 
 import killercreepr.hiking.trailncampplanner.entity.Note
+import killercreepr.hiking.trailncampplanner.entity.NoteType
 import killercreepr.hiking.trailncampplanner.entity.Route
 import killercreepr.hiking.trailncampplanner.entity.RoutePoint
 import killercreepr.hiking.trailncampplanner.entity.Trip
@@ -9,10 +10,13 @@ import org.springframework.data.jpa.repository.JpaRepository
 
 interface NoteRepository: JpaRepository<Note, Long>{
   fun findByIdAndCreatedById(id: Long, createdById: Long): Note?
+  fun findAllByTripIdAndType(tripId: Long, type: NoteType): List<Note>
   fun findAllByTripId(tripId: Long): List<Note>
   fun findAllByRouteId(routeId: Long): List<Note>
   fun findAllByRoutePointId(routePointId: Long): List<Note>
   fun findAllByTripIdAndLatitudeIsNotNullAndLongitudeIsNotNull(tripId: Long): List<Note>
+
+  fun existsByIdAndCreatedById(id: Long, createById: Long): Boolean
 }
 
 interface UserRepository: JpaRepository<User, Long>{
@@ -32,7 +36,9 @@ interface TripRepository : JpaRepository<Trip, Long>{
 }
 interface RouteRepository : JpaRepository<Route, Long>{
   fun findByIdAndTripUserId(id: Long, userId: Long): Route?
+  fun existsByIdAndTripUserId(id: Long, userId: Long): Boolean
 }
 interface RoutePointRepository : JpaRepository<RoutePoint, Long>{
   fun findByIdAndRouteTripUserId(id: Long, userId: Long): RoutePoint?
+  fun existsByIdAndRouteTripId(id: Long, userId: Long): Boolean
 }

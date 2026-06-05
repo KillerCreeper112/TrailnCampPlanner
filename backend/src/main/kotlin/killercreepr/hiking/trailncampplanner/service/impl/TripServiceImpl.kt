@@ -84,7 +84,9 @@ class TripServiceImpl(
     val trip = tripRepository.findById(id).orElseThrow {
       ResourceNotFoundException("Trip with id $id not found")
     }
-    val route = Route().apply {
+    val route = Route(
+      name = dto.name
+    ).apply {
       this.trip = trip
     }
     trip.routes.add(route)

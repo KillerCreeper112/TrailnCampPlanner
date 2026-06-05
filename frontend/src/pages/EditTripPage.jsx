@@ -2,8 +2,10 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { api } from "../api/api";
 import { ENDPOINTS } from "../api/api";
-import {TripDatePicker} from "../api/api_trip.jsx";
+import { TripDatePicker } from "../api/api_trip.jsx";
 import TripMap from "@/components/ui/TripMap.jsx";
+import CreateNewNote from "@/components/modal/CreateNewNote.jsx";
+import NotesList from "@/components/modal/NotesList.jsx";
 
 function EditTripPage() {
   const { id } = useParams();
@@ -14,20 +16,25 @@ function EditTripPage() {
   const [tripName, setTripName] = useState("");
   const [tripDates, setTripDates] = useState({
     from: undefined,
-    to: undefined,
-  })
+    to: undefined
+  });
   const [description, setDescription] = useState("");
   const [difficulty, setDifficulty] = useState("MEDIUM");
   const [routes, setRoutes] = useState([]);
   const [activeRouteId, setActiveRouteId] = useState(null);
   const [editorMode, setEditorMode] = useState(false);
+
   const [contextMenu, setContextMenu] = useState(null);
+  const [createNoteMenu, setCreateNoteMenu] = useState(null);
+
+  const [viewingNotes, setViewingNotes] = useState(null);
 
   const createRoute = async () => {
-    setContextMenu(null)
-    const response = await api.post(`${ENDPOINTS.TRIP}/${id}/routes`, {})
-    const newRoute = await response.json()
-    setRoutes(prev => [...prev, newRoute]);
+    setContextMenu(null);
+    const response = await api.post(`${ENDPOINTS.TRIP}/${id}/routes`, {});
+    const newRoute = await response.json();
+
+    setRoutes((prev) => [...prev, newRoute]);
     setActiveRouteId(newRoute.id);
     setEditorMode(true);
   };
@@ -64,11 +71,10 @@ function EditTripPage() {
         startDate: tripDates?.from
           ? tripDates.from.toISOString().split("T")[0]
           : null,
-
         endDate: tripDates?.to
           ? tripDates.to.toISOString().split("T")[0]
           : null,
-        difficulty
+        difficulty,
       });
 
       await res.json();
@@ -79,30 +85,29 @@ function EditTripPage() {
   };
 
   const handleMapClick = async (event) => {
-    setContextMenu(null)
+    setContextMenu(null);
     if (!activeRouteId) return;
 
     const lat = event.latLng.lat();
     const lng = event.latLng.lng();
 
-    const route = routes.find(r => r.id === activeRouteId);
-    if(!route) return;
+    const route = routes.find((r) => r.id === activeRouteId);
+    if (!route) return;
 
     const response = await api.post(`${ENDPOINTS.ROUTE}/${route.id}`, {
       latitude: lat,
       longitude: lng,
-      orderIndex: route.points.length
-    })
+      orderIndex: route.points.length,
+    });
+
     const newPoint = await response.json();
 
-    setRoutes(prev =>
-      prev.map(route => {
-        if (route.id !== activeRouteId) return route;
-        return {
-          ...route,
-          points: [...route.points, newPoint],
-        };
-      })
+    setRoutes((prev) =>
+      prev.map((r) =>
+        r.id !== activeRouteId
+          ? r
+          : { ...r, points: [...r.points, newPoint] }
+      )
     );
   };
 
@@ -110,67 +115,55 @@ function EditTripPage() {
     const lat = event.latLng.lat();
     const lng = event.latLng.lng();
 
-    const route = routes.find(r => r.id === routeId);
-    if(!route) return;
-    const response = await api.put(`${ENDPOINTS.ROUTE_POINT}/${pointId}`, {
-      latitude: lat,
-      longitude: lng
-    })
+    const response = await api.put(
+      `${ENDPOINTS.ROUTE_POINT}/${pointId}`,
+      { latitude: lat, longitude: lng }
+    );
 
     const newPoint = await response.json();
 
-    setRoutes(prev =>
-      prev.map(route => {
-        if (route.id !== routeId) return route;
-        return {
-          ...route,
-          points: route.points.map(p =>
-            p.id === pointId
-              ? newPoint
-              : p
-          ),
-        };
-      })
+    setRoutes((prev) =>
+      prev.map((route) =>
+        route.id !== routeId
+          ? route
+          : {
+            ...route,
+            points: route.points.map((p) =>
+              p.id === pointId ? newPoint : p
+            ),
+          }
+      )
     );
   };
 
-  const handleDeleteRoute = async (routeId) =>{
-    const response = await api.delete(`${ENDPOINTS.ROUTE}/${routeId}`, {});
-    setRoutes(prev =>{
-      return prev.filter(p => p.id !== routeId);
-    });
-  }
+  const handleDeleteRoute = async (routeId) => {
+    await api.delete(`${ENDPOINTS.ROUTE}/${routeId}`);
+    setRoutes((prev) => prev.filter((r) => r.id !== routeId));
+  };
 
   const handleDeletePoint = async (routeId, pointId) => {
-    const route = routes.find(r => r.id === routeId);
-    if(!route) return;
+    await api.delete(`${ENDPOINTS.ROUTE_POINT}/${pointId}`);
 
-    const response = await api.delete(`${ENDPOINTS.ROUTE_POINT}/${pointId}`, {});
-    //const result = await response.json()
-
-    setRoutes(prev =>
-      prev.map(route => {
-        if (route.id !== routeId) return route;
-        return {
-          ...route,
-          points: route.points.filter(p => p.id !== pointId),
-        };
-      })
+    setRoutes((prev) =>
+      prev.map((route) =>
+        route.id !== routeId
+          ? route
+          : {
+            ...route,
+            points: route.points.filter((p) => p.id !== pointId),
+          }
+      )
     );
 
     setContextMenu(null);
   };
 
   if (loading) {
-    return (
-      <div className="text-[#E6E6E6] p-6">
-        Loading trip...
-      </div>
-    );
+    return <div className="text-[#E6E6E6] p-6">Loading trip...</div>;
   }
 
   return (
-    <div className="min-h-screen bg-[#121A17] text-[#E6E6E6] p-6 space-y-6">
+    <div className="relative min-h-screen bg-[#121A17] text-[#E6E6E6] p-6 space-y-6">
 
       <div className="bg-[#1E2C26] p-6 rounded-2xl border border-[#2A3A33] max-w-md mx-auto">
         <h2 className="text-xl font-bold text-[#C2A878] mb-4">
@@ -223,7 +216,6 @@ function EditTripPage() {
       </div>
 
       <div className="flex gap-4 max-w-6xl mx-auto">
-
         <div className="w-64 bg-[#1E2C26] p-4 rounded-xl">
           <h3 className="text-[#C2A878] font-bold mb-2">Routes</h3>
 
@@ -238,12 +230,9 @@ function EditTripPage() {
             <div
               key={r.id}
               onClick={() => {
-                if(activeRouteId === r.id){
-                  setActiveRouteId(null)
-                  setEditorMode(false)
-                  return;
-                }
-                setActiveRouteId(r.id);
+                setActiveRouteId((prev) =>
+                  prev === r.id ? null : r.id
+                );
                 setEditorMode(true);
               }}
               className={`p-2 rounded mb-2 cursor-pointer ${
@@ -254,12 +243,13 @@ function EditTripPage() {
             >
               <div className="flex justify-between items-center">
                 <span>Route #{r.id}</span>
+
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
                     handleDeleteRoute(r.id);
                   }}
-                  className="p-1 bg-red-500 rounded cursor-pointer"
+                  className="p-1 bg-red-500 rounded"
                 >
                   🗑️
                 </button>
@@ -273,12 +263,7 @@ function EditTripPage() {
             routes={routes}
             selectedRouteId={activeRouteId}
             onClick={editorMode ? handleMapClick : undefined}
-            onDragStart={(e) =>{
-              setContextMenu(null)
-            }}
-            onMarkerDragEnd={(routeId, pointId, event) =>{
-              handleMarkerDragEnd(routeId, pointId, event);
-            }}
+            onMarkerDragEnd={handleMarkerDragEnd}
             onMarkerRightClick={(routeId, pointId, e) => {
               setContextMenu({
                 x: e.domEvent.clientX,
@@ -289,37 +274,101 @@ function EditTripPage() {
             }}
           />
         </div>
+      </div>
 
-        {contextMenu && (
-          <div
-            className="fixed bg-[#1E2C26] border border-[#2A3A33] rounded-lg shadow-lg p-2 z-50"
-            style={{
-              top: contextMenu.y,
-              left: contextMenu.x,
-            }}
+      {contextMenu && (
+        <div
+          className="fixed bg-[#1E2C26] border border-[#2A3A33] rounded-lg shadow-lg p-2 z-50"
+          style={{ top: contextMenu.y, left: contextMenu.x }}
+        >
+          <button
+            onClick={() =>
+              handleDeletePoint(
+                contextMenu.routeId,
+                contextMenu.pointId
+              )
+            }
+            className="text-red-400 px-3 py-1 w-full text-left"
           >
-            <button
-              onClick={() =>
-                handleDeletePoint(
-                  contextMenu.routeId,
-                  contextMenu.pointId
-                )
-              }
-              className="text-red-400 hover:bg-[#2A3A33] px-3 py-1 rounded w-full text-left"
-            >
-              Delete Point
-            </button>
+            Delete Point
+          </button>
 
-            <button
-              onClick={() => setContextMenu(null)}
-              className="text-gray-300 hover:bg-[#2A3A33] px-3 py-1 rounded w-full text-left"
-            >
-              Cancel
+          <button
+            onClick={() => {
+              setCreateNoteMenu({
+                link: `${ENDPOINTS.NOTE}/route_points/${contextMenu.pointId}`,
+              });
+              setContextMenu(null);
+            }}
+            className="px-3 py-1 w-full text-left"
+          >
+            Add Note
+          </button>
+
+          <button
+            onClick={async () => {
+              const pointId = contextMenu.pointId;
+              setContextMenu(null);
+              const res = await api.get(
+                `${ENDPOINTS.NOTE}/route_points/${pointId}`
+              );
+              const data = await res.json();
+              setViewingNotes(data);
+            }}
+            className="px-3 py-1 w-full text-left"
+          >
+            View Notes
+          </button>
+
+          <button
+            onClick={() => setContextMenu(null)}
+            className="px-3 py-1 w-full text-left"
+          >
+            Cancel
+          </button>
+        </div>
+      )}
+      {viewingNotes && (
+        <div
+          className="fixed inset-0 bg-black/40 z-40"
+          onClick={() => setViewingNotes(null)}
+        />
+      )}
+      <div
+        className={`
+          fixed top-0 right-0 h-full w-[380px]
+          bg-[#1E2C26] border-l border-[#2A3A33]
+          z-50 shadow-2xl
+          transform transition-transform duration-300
+          ${viewingNotes ? "translate-x-0" : "translate-x-full"}
+        `}
+      >
+        <div className="p-4 h-full flex flex-col">
+          <div className="flex justify-between mb-4">
+            <h3 className="text-[#C2A878] font-bold">Notes</h3>
+
+            <button onClick={() => setViewingNotes(null)}>
+              X
             </button>
           </div>
-        )}
 
+          <div className="flex-1 overflow-y-auto">
+            {viewingNotes && (
+              <NotesList notes={viewingNotes} />
+            )}
+          </div>
+        </div>
       </div>
+
+      {createNoteMenu && (
+        <CreateNewNote
+          onCreate={async (e) => {
+            await api.post(createNoteMenu.link, e);
+            setCreateNoteMenu(null);
+          }}
+          onClose={() => setCreateNoteMenu(null)}
+        />
+      )}
     </div>
   );
 }

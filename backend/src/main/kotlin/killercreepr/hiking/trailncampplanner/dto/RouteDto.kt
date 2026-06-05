@@ -2,8 +2,10 @@ package killercreepr.hiking.trailncampplanner.dto
 
 data class RouteDto(
   val id: Long,
-  val name: String,
+  val name: String?,
   val points: List<RoutePointDto>
 )
 
-class CreateRouteRequest
+data class CreateRouteRequest(
+  val name: String?
+)

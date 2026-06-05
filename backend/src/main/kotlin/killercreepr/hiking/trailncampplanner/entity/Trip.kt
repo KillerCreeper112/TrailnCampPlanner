@@ -21,6 +21,9 @@ class Trip(
 
   @OneToMany(fetch = FetchType.LAZY, mappedBy = "trip", cascade = [CascadeType.ALL], orphanRemoval = true)
   var routes: MutableList<Route> = mutableListOf(),
+
+  @OneToMany(fetch = FetchType.LAZY, mappedBy = "trip", cascade = [CascadeType.ALL], orphanRemoval = true)
+  var notes: MutableList<Note> = mutableListOf()
 ){
   @CreatedDate
   lateinit var createdAt: Instant

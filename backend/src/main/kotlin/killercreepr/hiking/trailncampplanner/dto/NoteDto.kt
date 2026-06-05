@@ -1,9 +1,11 @@
 package killercreepr.hiking.trailncampplanner.dto
 
+import killercreepr.hiking.trailncampplanner.entity.NoteType
 import java.time.Instant
 
 data class NoteDto(
   val id: Long,
+  val type: NoteType,
   val content: String,
   val latitude: Double?,
   val longitude: Double?,
@@ -24,6 +26,16 @@ data class CreateNoteRequest(
   val content: String,
   val latitude: Double?,
   val longitude: Double?,
-  val icon: String?,
+  val icon: String?
+)
 
+data class UpdateNoteRequest(
+  val content: String,
+  val latitude: Double?,
+  val longitude: Double?,
+  val icon: String?
+)
+
+data class CreateNoteCommentRequest(
+  val content: String
 )

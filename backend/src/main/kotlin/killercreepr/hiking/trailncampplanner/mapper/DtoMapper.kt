@@ -25,7 +25,9 @@ fun Trip.mapToDto(): TripDto = TripDto(
 )
 
 fun Note.mapToDto(): NoteDto = NoteDto(
-  id, content, latitude, longitude, icon,
+  id,
+  type,
+  content, latitude, longitude, icon,
   createdBy.mapToDto(),
   trip.mapToDto(),
   route?.mapToDto(),
