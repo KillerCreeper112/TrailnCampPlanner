@@ -6,6 +6,7 @@ import { TripDatePicker } from "../api/api_trip.jsx";
 import TripMap from "@/components/ui/TripMap.jsx";
 import CreateNewNote from "@/components/modal/CreateNewNote.jsx";
 import NotesList from "@/components/modal/NotesList.jsx";
+import EditNote from "@/components/modal/EditNote.jsx";
 
 function EditTripPage() {
   const { id } = useParams();
@@ -28,6 +29,7 @@ function EditTripPage() {
   const [contextMenu, setContextMenu] = useState(null);
   const [mapContext, setMapContext] = useState(null);
   const [createNoteMenu, setCreateNoteMenu] = useState(null);
+  const [editingNote, setEditingNote] = useState(null);
 
   const [viewingNotes, setViewingNotes] = useState(null);
 
@@ -293,6 +295,7 @@ function EditTripPage() {
           <TripMap
             routes={routes}
             mapNotes={mapNotes}
+            setMapNotes={setMapNotes}
             selectedRouteId={activeRouteId}
             onClick={editorMode ? handleMapEditorClick : handleMapClick}
             onMarkerDragEnd={handleMarkerDragEnd}
@@ -304,6 +307,9 @@ function EditTripPage() {
                 pointId,
               });
             }}
+            onNoteClick={(note =>{
+              setEditingNote(note);
+            })}
           />
         </div>
       </div>
@@ -464,6 +470,31 @@ function EditTripPage() {
           </div>
         </div>
       </div>
+
+      {editingNote && (
+        <EditNote
+          note={editingNote}
+          onCreate={async (data) =>{
+            const noteId = editingNote.id;
+            setEditingNote(null);
+            const response = await api.put(`${ENDPOINTS.NOTE}/note/${noteId}`, data)
+            const json = await response.json();
+            setMapNotes((prev) => prev.map((n) =>{
+              if(n.id === json.id) return json;
+              return n;
+            }));
+          }}
+          onClose={(e) =>{
+            setEditingNote(null);
+          }}
+          onDelete={async (e) =>{
+            const noteId = editingNote.id;
+            setEditingNote(null);
+            await api.delete(`${ENDPOINTS.NOTE}/${noteId}`);
+            setMapNotes((prev) => prev.filter((note) => note.id !== noteId))
+          }}
+        />
+      )}
 
       {createNoteMenu && (
         <CreateNewNote

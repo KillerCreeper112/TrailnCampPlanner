@@ -30,7 +30,7 @@ data class CreateNoteRequest(
 )
 
 data class UpdateNoteRequest(
-  val content: String,
+  val content: String? = null,
   val latitude: Double? = null,
   val longitude: Double? = null,
   val icon: String? = null

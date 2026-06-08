@@ -85,10 +85,10 @@ class NoteServiceImpl(
     val note = noteRepository.findByIdAndCreatedById(id, createdById)
       ?: throw AccessDeniedException("Access denied")
     return noteRepository.save(note.also {
-      it.icon = dto.icon
-      it.content = dto.content
-      it.latitude = dto.latitude
-      it.longitude = dto.longitude
+      it.icon = dto.icon ?: it.icon
+      it.content = dto.content ?: it.content
+      it.latitude = dto.latitude ?: it.latitude
+      it.longitude = dto.longitude ?: it.longitude
     }).mapToDto()
   }
 

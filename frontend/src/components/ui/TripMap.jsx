@@ -9,6 +9,8 @@ import {
 } from "@react-google-maps/api";
 import {useRef, useState} from "react";
 import {Button} from "@base-ui/react";
+import NotePin from "@/components/ui/NotePin.jsx";
+import {api, ENDPOINTS} from "@/api/api.js";
 
 const containerStyle = {
   width: "100%",
@@ -20,9 +22,14 @@ const center = {
   lng: -75.0,
 };
 
-function TripMap({ routes, mapNotes, selectedRouteId, onClick, onDragStart, onMarkerDragEnd, onMarkerRightClick}) {
+
+function TripMap({
+                   routes, mapNotes, setMapNotes, selectedRouteId, onClick, onDragStart, onMarkerDragEnd, onMarkerRightClick,
+  onNoteClick
+                 }) {
   const searchBoxRef = useRef(null);
   const [map, setMap] = useState(null);
+
   const { isLoaded } = useJsApiLoader({
     googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_KEY,
     libraries: ["places"]
@@ -91,19 +98,25 @@ function TripMap({ routes, mapNotes, selectedRouteId, onClick, onDragStart, onMa
           <>
             {
               mapNotes.map((note) =>(
-                <OverlayView
-                  id={`note/${note.id}`}
-                  position={{
-                    lat: note.latitude,
-                    lng: note.longitude
+                <NotePin
+                  note={note}
+                  onDragEnd={async (noteId, lat, lng) =>{
+                    const response = await api.put(`${ENDPOINTS.NOTE}/note/${note.id}`, {
+                      content: note.content,
+                      latitude: lat,
+                      longitude: lng,
+                    })
+                    const data = await response.json();
+
+                    setMapNotes((prev => prev.map((note) =>{
+                      if(note.id === data.id){
+                        return data;
+                      }
+                      return note;
+                    })))
                   }}
-                  mapPaneName={OverlayView.OVERLAY_MOUSE_TARGET}
-                >
-                  <div className="bg-black border border-black p-1 flex shadow rounded w-fit">
-                    <span className="text-white-100">{note.icon}</span>
-                    <span className="ml-1">{note.content}</span>
-                  </div>
-                </OverlayView>
+                  onClick={onNoteClick}
+                />
               ))
             }
           </>
