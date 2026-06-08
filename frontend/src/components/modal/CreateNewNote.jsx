@@ -8,8 +8,8 @@ function CreateNewNote({ onCreate, onClose }) {
     //if (!content.trim()) return;
 
     onCreate({
-      icon,
-      content,
+      icon:  icon ? icon : null,
+      content: content,
     });
 
     setIcon("");

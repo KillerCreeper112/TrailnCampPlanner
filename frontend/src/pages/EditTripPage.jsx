@@ -21,10 +21,12 @@ function EditTripPage() {
   const [description, setDescription] = useState("");
   const [difficulty, setDifficulty] = useState("MEDIUM");
   const [routes, setRoutes] = useState([]);
+  const [mapNotes, setMapNotes] = useState([]);
   const [activeRouteId, setActiveRouteId] = useState(null);
   const [editorMode, setEditorMode] = useState(false);
 
   const [contextMenu, setContextMenu] = useState(null);
+  const [mapContext, setMapContext] = useState(null);
   const [createNoteMenu, setCreateNoteMenu] = useState(null);
 
   const [viewingNotes, setViewingNotes] = useState(null);
@@ -38,6 +40,12 @@ function EditTripPage() {
     setActiveRouteId(newRoute.id);
     setEditorMode(true);
   };
+
+  const loadMapNotes = async () => {
+    const response = await api.get(`${ENDPOINTS.NOTE}/map/${id}`)
+    const data = await response.json();
+    setMapNotes(data || [])
+  }
 
   useEffect(() => {
     async function loadTrip() {
@@ -53,6 +61,7 @@ function EditTripPage() {
         setDescription(data.description || "");
         setDifficulty(data.difficulty || "MEDIUM");
         setRoutes(data.routes || []);
+        await loadMapNotes();
       } catch (err) {
         console.error("Failed to load trip", err);
       } finally {
@@ -84,14 +93,36 @@ function EditTripPage() {
     }
   };
 
-  const handleMapClick = async (event) => {
+  const handleMapClick = async (event) =>{
+    const lat = event.latLng.lat();
+    const lng = event.latLng.lng();
+    setMapContext({
+      lat: lat,
+      lng: lng,
+      x: event.domEvent.clientX,
+      y: event.domEvent.clientY,
+    })
+  }
+
+  const handleMapEditorClick = async (event) => {
     setContextMenu(null);
-    if (!activeRouteId) return;
+    if (!activeRouteId){
+      await handleMapClick(event);
+      return;
+    }
 
     const lat = event.latLng.lat();
     const lng = event.latLng.lng();
 
-    const route = routes.find((r) => r.id === activeRouteId);
+    setMapContext({
+      lat: lat,
+      lng: lng,
+      x: event.domEvent.clientX,
+      y: event.domEvent.clientY,
+      routeId: activeRouteId
+    })
+
+    /*const route = routes.find((r) => r.id === activeRouteId);
     if (!route) return;
 
     const response = await api.post(`${ENDPOINTS.ROUTE}/${route.id}`, {
@@ -108,7 +139,7 @@ function EditTripPage() {
           ? r
           : { ...r, points: [...r.points, newPoint] }
       )
-    );
+    );*/
   };
 
   const handleMarkerDragEnd = async (routeId, pointId, event) => {
@@ -261,8 +292,9 @@ function EditTripPage() {
         <div className="flex-1">
           <TripMap
             routes={routes}
+            mapNotes={mapNotes}
             selectedRouteId={activeRouteId}
-            onClick={editorMode ? handleMapClick : undefined}
+            onClick={editorMode ? handleMapEditorClick : handleMapClick}
             onMarkerDragEnd={handleMarkerDragEnd}
             onMarkerRightClick={(routeId, pointId, e) => {
               setContextMenu({
@@ -275,6 +307,74 @@ function EditTripPage() {
           />
         </div>
       </div>
+
+      {mapContext && (
+        <div
+          className="fixed bg-[#1E2C26] border border-[#2A3A33] rounded-lg shadow-lg p-2 z-50"
+          style={{ top: mapContext.y, left: mapContext.x }}
+        >
+          {mapContext.routeId && (
+            <button
+              className="px-3 py-1 w-full text-left"
+              onClick={async (e) =>{
+                const routeId = mapContext.routeId;
+                const lat = mapContext.lat;
+                const lng = mapContext.lng;
+                setMapContext(null);
+                const route = routes.find((r) => r.id === routeId);
+                if (!route) return;
+                const response = await api.post(`${ENDPOINTS.ROUTE}/${route.id}`, {
+                  latitude: lat,
+                  longitude: lng,
+                  orderIndex: route.points.length,
+                });
+
+                const newPoint = await response.json();
+
+                setRoutes((prev) =>
+                  prev.map((r) =>
+                    r.id !== activeRouteId
+                      ? r
+                      : { ...r, points: [...r.points, newPoint] }
+                  )
+                );
+              }}
+            >
+              Add Route Point
+            </button>
+          )}
+          <button
+            className="px-3 py-1 w-full text-left"
+            onClick={(e) =>{
+              const lat = mapContext.lat;
+              const lng = mapContext.lng;
+              setMapContext(null);
+              setCreateNoteMenu({
+                create: async (e) =>{
+                  const response = await api.post(`${ENDPOINTS.NOTE}/trips/${id}`, {
+                    ...e,
+                    latitude: lat,
+                    longitude: lng,
+                  });
+                  const data = await response.json();
+
+                  setMapNotes((prev) => [...prev, data]);
+                }
+              })
+            }}
+            >
+            Add Note
+          </button>
+          <button
+          className="px-3 py-1 w-full text-left"
+          onClick={(e) =>{
+            setMapContext(null);
+          }}
+          >
+            Cancel
+          </button>
+        </div>
+      )}
 
       {contextMenu && (
         <div
@@ -295,8 +395,11 @@ function EditTripPage() {
 
           <button
             onClick={() => {
+              const pointId = contextMenu.pointId;
               setCreateNoteMenu({
-                link: `${ENDPOINTS.NOTE}/route_points/${contextMenu.pointId}`,
+                create: async (e) =>{
+                  await api.post(`${ENDPOINTS.NOTE}/route_points/${pointId}`, e);
+                }
               });
               setContextMenu(null);
             }}
@@ -354,7 +457,9 @@ function EditTripPage() {
 
           <div className="flex-1 overflow-y-auto">
             {viewingNotes && (
-              <NotesList notes={viewingNotes} />
+              <NotesList notes={viewingNotes} onDelete={(noteId) =>{
+                setViewingNotes(viewingNotes.filter((note) => note.id !== noteId))
+              }}/>
             )}
           </div>
         </div>
@@ -363,7 +468,7 @@ function EditTripPage() {
       {createNoteMenu && (
         <CreateNewNote
           onCreate={async (e) => {
-            await api.post(createNoteMenu.link, e);
+            await createNoteMenu.create(e);
             setCreateNoteMenu(null);
           }}
           onClose={() => setCreateNoteMenu(null)}

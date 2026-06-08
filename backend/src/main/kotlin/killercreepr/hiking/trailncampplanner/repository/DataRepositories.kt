@@ -14,6 +14,7 @@ interface NoteRepository: JpaRepository<Note, Long>{
   fun findAllByTripId(tripId: Long): List<Note>
   fun findAllByRouteId(routeId: Long): List<Note>
   fun findAllByRoutePointId(routePointId: Long): List<Note>
+  fun findAllByRoutePointIdAndRoutePointRouteTripUserId(routePointId: Long, routePointRouteTripUserId: Long): List<Note>
   fun findAllByTripIdAndLatitudeIsNotNullAndLongitudeIsNotNull(tripId: Long): List<Note>
 
   fun existsByIdAndCreatedById(id: Long, createById: Long): Boolean

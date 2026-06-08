@@ -1,5 +1,14 @@
-import {GoogleMap, Polyline, Marker, useJsApiLoader, StandaloneSearchBox} from "@react-google-maps/api";
+import {
+  GoogleMap,
+  Polyline,
+  Marker,
+  useJsApiLoader,
+  StandaloneSearchBox,
+  InfoBox,
+  OverlayView
+} from "@react-google-maps/api";
 import {useRef, useState} from "react";
+import {Button} from "@base-ui/react";
 
 const containerStyle = {
   width: "100%",
@@ -11,7 +20,7 @@ const center = {
   lng: -75.0,
 };
 
-function TripMap({ routes, selectedRouteId, onClick, onDragStart, onMarkerDragEnd, onMarkerRightClick}) {
+function TripMap({ routes, mapNotes, selectedRouteId, onClick, onDragStart, onMarkerDragEnd, onMarkerRightClick}) {
   const searchBoxRef = useRef(null);
   const [map, setMap] = useState(null);
   const { isLoaded } = useJsApiLoader({
@@ -29,7 +38,7 @@ function TripMap({ routes, selectedRouteId, onClick, onDragStart, onMarkerDragEn
     const lng = location.lng();
     const lat = location.lat();
 
-    map?.panTo(lat, lng);
+    map?.panTo({lat, lng});
   };
 
   const colors = ["#ff4d4d", "#4d79ff", "#4dff88", "#ffcc4d"];
@@ -76,6 +85,27 @@ function TripMap({ routes, selectedRouteId, onClick, onDragStart, onMarkerDragEn
                 }}
               />
             ))}
+          </>
+        )}
+        {mapNotes && (
+          <>
+            {
+              mapNotes.map((note) =>(
+                <OverlayView
+                  id={`note/${note.id}`}
+                  position={{
+                    lat: note.latitude,
+                    lng: note.longitude
+                  }}
+                  mapPaneName={OverlayView.OVERLAY_MOUSE_TARGET}
+                >
+                  <div className="bg-black border border-black p-1 flex shadow rounded w-fit">
+                    <span className="text-white-100">{note.icon}</span>
+                    <span className="ml-1">{note.content}</span>
+                  </div>
+                </OverlayView>
+              ))
+            }
           </>
         )}
       </GoogleMap>

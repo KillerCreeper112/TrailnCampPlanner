@@ -37,8 +37,13 @@ class NoteServiceImpl(
     val user = user(userId)
     val trip = tripRepository.findByIdAndUserId(tripId, userId) ?:
     throw AccessDeniedException("Access denied")
+
+    if((dto.latitude == null) != (dto.longitude == null)){
+      throw IllegalArgumentException("Invalid latitude and longitude values")
+    }
+
     val note = Note().also {
-      it.type = NoteType.TRIP
+      it.type = if(dto.latitude != null) NoteType.MAP else NoteType.TRIP
       it.content = dto.content
       it.longitude = dto.longitude
       it.latitude = dto.latitude
@@ -47,7 +52,7 @@ class NoteServiceImpl(
       it.createdBy = user
       it.trip = trip
     }
-    return noteRepository.save(note).mapToDto()
+    return noteRepository.saveAndFlush(note).mapToDto()
   }
 
   override fun createRouteNote(
@@ -146,8 +151,8 @@ class NoteServiceImpl(
     userId: Long,
     routePointId: Long
   ): List<NoteDto> {
-    if(!routePointRepository.existsByIdAndRouteTripId(routePointId, userId))
-      throw AccessDeniedException("Access denied")
-    return noteRepository.findAllByRoutePointId(routePointId).map { it.mapToDto() }
+    /*if(!routePointRepository.existsByIdAndRouteTripId(routePointId, userId))
+      throw AccessDeniedException("Access denied")*/
+    return noteRepository.findAllByRoutePointIdAndRoutePointRouteTripUserId(routePointId, userId).map { it.mapToDto() }
   }
 }

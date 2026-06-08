@@ -24,16 +24,16 @@ data class NoteCommentDto(
 
 data class CreateNoteRequest(
   val content: String,
-  val latitude: Double?,
-  val longitude: Double?,
-  val icon: String?
+  val latitude: Double? = null,
+  val longitude: Double? = null,
+  val icon: String? = null
 )
 
 data class UpdateNoteRequest(
   val content: String,
-  val latitude: Double?,
-  val longitude: Double?,
-  val icon: String?
+  val latitude: Double? = null,
+  val longitude: Double? = null,
+  val icon: String? = null
 )
 
 data class CreateNoteCommentRequest(
