@@ -32,7 +32,7 @@ function NotePin({note, onDragEnd, onClick}){
       mapPaneName={OverlayView.OVERLAY_MOUSE_TARGET}
     >
       <div
-        className="bg-black border border-black px-2 py-1 flex shadow rounded w-fit cursor-pointer"
+        className="relative bg-black border border-black px-2 py-1 flex shadow rounded w-fit cursor-pointer"
         onMouseEnter={(e) => setHover(true)}
         onMouseLeave={(e) => setHover(false)}
         onMouseDown={(e) =>{
@@ -42,7 +42,9 @@ function NotePin({note, onDragEnd, onClick}){
       >
         <span className="text-white">{note.icon}</span>
         {hover && (
-          <span className="ml-1 whitespace-nowrap">{note.content}</span>
+          <div className="whitespace-pre-wrap absolute left-full top-0 ml-1 bg-black text-white p-2 rounded m-w-[100px] break-words z-50">
+            {note.content}
+          </div>
         )}
       </div>
     </OverlayView>

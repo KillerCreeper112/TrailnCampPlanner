@@ -5,6 +5,7 @@ import killercreepr.hiking.trailncampplanner.dto.CreateRouteRequest
 import killercreepr.hiking.trailncampplanner.dto.RouteDto
 import killercreepr.hiking.trailncampplanner.dto.RoutePointDto
 import killercreepr.hiking.trailncampplanner.dto.UpdateRoutePointRequest
+import killercreepr.hiking.trailncampplanner.dto.UpdateRouteRequest
 import killercreepr.hiking.trailncampplanner.entity.Route
 import killercreepr.hiking.trailncampplanner.entity.RoutePoint
 import killercreepr.hiking.trailncampplanner.exception.ResourceNotFoundException
@@ -12,6 +13,7 @@ import killercreepr.hiking.trailncampplanner.mapper.mapToDto
 import killercreepr.hiking.trailncampplanner.repository.RouteRepository
 import killercreepr.hiking.trailncampplanner.repository.TripRepository
 import killercreepr.hiking.trailncampplanner.service.RouteService
+import org.springframework.security.access.AccessDeniedException
 import org.springframework.stereotype.Service
 
 @Service
@@ -50,5 +52,17 @@ class RouteServiceImpl(
   override fun deleteRoute(id: Long, userId: Long) {
     if(!routeRepository.existsById(id)) throw ResourceNotFoundException("Route with ID $id not found")
     routeRepository.deleteById(id)
+  }
+
+  override fun updateRoute(
+    id: Long,
+    userId: Long,
+    dto: UpdateRouteRequest
+  ): RouteDto {
+    val route = routeRepository.findByIdAndTripUserId(id, userId) ?:
+    throw AccessDeniedException("Access denied")
+    return routeRepository.save(route.apply {
+      name = dto.name
+    }).mapToDto()
   }
 }

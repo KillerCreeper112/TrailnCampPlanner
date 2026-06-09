@@ -7,6 +7,7 @@ import TripMap from "@/components/ui/TripMap.jsx";
 import CreateNewNote from "@/components/modal/CreateNewNote.jsx";
 import NotesList from "@/components/modal/NotesList.jsx";
 import EditNote from "@/components/modal/EditNote.jsx";
+import EditRoute from "@/components/modal/EditRoute.jsx";
 
 function EditTripPage() {
   const { id } = useParams();
@@ -30,6 +31,7 @@ function EditTripPage() {
   const [mapContext, setMapContext] = useState(null);
   const [createNoteMenu, setCreateNoteMenu] = useState(null);
   const [editingNote, setEditingNote] = useState(null);
+  const [editingRoute, setEditingRoute] = useState(null);
 
   const [viewingNotes, setViewingNotes] = useState(null);
 
@@ -275,7 +277,17 @@ function EditTripPage() {
               }`}
             >
               <div className="flex justify-between items-center">
-                <span>Route #{r.id}</span>
+                <span>{r.name ?? `Route #${r.id}`}</span>
+
+                <button
+                  onClick={(e) =>{
+                    e.stopPropagation();
+                    setEditingRoute(r);
+                  }}
+                  className="p-1 rounded bg-black"
+                  >
+                  Edit
+                </button>
 
                 <button
                   onClick={(e) => {
@@ -470,6 +482,29 @@ function EditTripPage() {
           </div>
         </div>
       </div>
+
+      {editingRoute && (
+        <EditRoute
+          route={editingRoute}
+          onCreate={async (data)=> {
+            const routeId = editingRoute.id;
+            setEditingRoute(null);
+            const response = await api.put(`${ENDPOINTS.ROUTE}/${routeId}`, data);
+            const newRoute = await response.json();
+            setRoutes((prev) => prev.map(route =>{
+              if(route.id === newRoute.id) return newRoute;
+              return route;
+            }));
+          }}
+          onDelete={async () =>{
+            const routeId = editingRoute.id;
+            setEditingRoute(null);
+            await api.delete(`${ENDPOINTS.ROUTE}/${routeId}`);
+            setRoutes((prev) => prev.filter((route) => route.id !== routeId));
+          }}
+          onClose={() => setEditingRoute(null)}
+        />
+      )}
 
       {editingNote && (
         <EditNote

@@ -87,7 +87,7 @@ function TripMap({
                 onDragEnd={(e) =>
                   onMarkerDragEnd?.(route.id, p.id, e)
                 }
-                onRightClick={(e) =>{
+                onClick={(e) =>{
                   onMarkerRightClick?.(route.id, p.id, e)
                 }}
               />

@@ -9,3 +9,7 @@ data class RouteDto(
 data class CreateRouteRequest(
   val name: String?
 )
+
+data class UpdateRouteRequest(
+  val name: String?
+)

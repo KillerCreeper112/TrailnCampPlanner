@@ -4,6 +4,7 @@ import killercreepr.hiking.trailncampplanner.dto.CreateRoutePointRequest
 import killercreepr.hiking.trailncampplanner.dto.RouteDto
 import killercreepr.hiking.trailncampplanner.dto.RoutePointDto
 import killercreepr.hiking.trailncampplanner.dto.UpdateRoutePointRequest
+import killercreepr.hiking.trailncampplanner.dto.UpdateRouteRequest
 import killercreepr.hiking.trailncampplanner.entity.PrincipalUser
 import killercreepr.hiking.trailncampplanner.service.RouteService
 import org.springframework.http.HttpStatus
@@ -23,13 +24,22 @@ class RouteController(
   val routeService: RouteService
 ) {
   @PostMapping("/{id}")
-  fun addRoutePoint(@AuthenticationPrincipal user: Any?,
+  fun addRoutePoint(@AuthenticationPrincipal user: PrincipalUser,
                     @PathVariable id: Long,
                     @RequestBody dto: CreateRoutePointRequest): ResponseEntity<RoutePointDto> {
     return ResponseEntity(routeService.addRoutePoint(
-      id, (user as PrincipalUser).id, dto
+      id, user.id, dto
     ), HttpStatus.CREATED)
   }
+
+  @PutMapping("/{id}")
+  fun updateRoutePoint(
+    @AuthenticationPrincipal user: PrincipalUser,
+    @PathVariable id: Long,
+    @RequestBody dto: UpdateRouteRequest
+  ): ResponseEntity<RouteDto> = ResponseEntity.ok(
+    routeService.updateRoute(id, user.id, dto)
+  )
 
   @DeleteMapping("/{id}")
   fun deleteRoute(@AuthenticationPrincipal user: PrincipalUser,
